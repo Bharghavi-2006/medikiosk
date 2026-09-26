@@ -1,0 +1,30 @@
+# Render Blueprint — one-click deployable link.
+#
+# 1. Push this repo to GitHub.
+# 2. dashboard.render.com -> New + -> Blueprint -> pick the repo.
+# 3. When prompted for SARVAM_API_KEY: leave it EMPTY for a public demo link
+#    (mock mode — touch input, spoken questions via the browser, no API cost),
+#    or paste your key for the full voice experience.
+#    (Anyone with the link can use your credits if you set the key — prefer
+#    the tunnel option in DEPLOY.md for private demos with voice.)
+# 4. Done: you get https://medikiosk-interview.onrender.com
+#
+# Notes: free plan instances sleep after ~15 min idle (first load then takes
+# ~30-60 s to wake); WebSockets are supported; auto-deploys on git push.
+
+services:
+  - type: web
+    name: medikiosk-interview
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: SARVAM_API_KEY
+        sync: false          # prompted at deploy time; empty = mock mode
+      - key: STT_PROVIDER
+        value: auto
+      - key: REALTIME_SILENCE_MS
+        value: "600"
+      - key: TTS_MODEL
+        value: bulbul:v2

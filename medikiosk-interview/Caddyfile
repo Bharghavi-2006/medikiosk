@@ -1,0 +1,23 @@
+# Kiosk HTTPS proxy.
+#
+# Public domain (automatic Let's Encrypt certificates):
+#   kiosk.yourdomain.in {
+#       reverse_proxy medikiosk:8000
+#   }
+#
+# Private hospital LAN (no public DNS): self-signed internal certs —
+# tablets must trust the CA once, or use a public domain instead.
+#
+# Caddy proxies WebSockets (incl. upgrades) automatically — no extra config.
+
+{$KIOSK_DOMAIN} {
+	encode gzip
+	reverse_proxy medikiosk:8000
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+	}
+}

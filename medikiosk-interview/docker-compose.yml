@@ -1,0 +1,48 @@
+# MediKiosk — one box runs the app (+ optional TLS proxy).
+#   docker compose up -d            # app only, plain HTTP on :8000 (localhost/dev)
+#   docker compose --profile tls up -d   # app + Caddy with automatic HTTPS
+
+services:
+  medikiosk:
+    build: .
+    image: medikiosk:latest
+    restart: unless-stopped
+    env_file: .env                      # copy .env.example to .env first
+    environment:
+      - FRONTEND_PATH=/app/frontend/index.html
+    expose:
+      - "8000"
+    ports:
+      - "127.0.0.1:8000:8000"          # bound to loopback; use the tls profile
+                                       # or your own reverse proxy to expose it
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+  # Automatic HTTPS (Let's Encrypt) — requires a DNS name pointing here.
+  # Set KIOSK_DOMAIN in .env, then: docker compose --profile tls up -d
+  caddy:
+    image: caddy:2
+    profiles: ["tls"]
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      KIOSK_DOMAIN: ${KIOSK_DOMAIN:?set KIOSK_DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - medikiosk
+
+volumes:
+  caddy_data:
+  caddy_config:

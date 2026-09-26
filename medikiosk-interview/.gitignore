@@ -1,0 +1,12 @@
+# secrets — never commit
+.env
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# os / editor
+.DS_Store
+.idea/
+.vscode/

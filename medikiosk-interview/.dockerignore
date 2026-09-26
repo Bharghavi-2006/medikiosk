@@ -1,0 +1,11 @@
+.git
+.gitignore
+.env
+*.md
+backend/.venv
+backend/__pycache__
+backend/**/__pycache__
+backend/tests
+Dockerfile
+docker-compose.yml
+Caddyfile
